@@ -60,7 +60,7 @@ class ObjectSet(models.Model):
     class Meta(object):
         abstract = True
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def __init__(self, *args, **kwargs):
         # Set to an empty queryset
         self._pending = self._object_class.objects.none()
@@ -362,7 +362,7 @@ class ObjectSet(models.Model):
 
         return self.__class__(objects.filter(pk__in=pks))
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def save(self, *args, **kwargs):
         # If this is new, use bulk if supported
         new = self.pk is None
@@ -378,7 +378,7 @@ class ObjectSet(models.Model):
             else:
                 self.replace(pending)
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def bulk(self, objs, added=False):
         """Attempts to bulk load objects. Although this is the most efficient
         way to add objects, if any fail to be added, none will be added.
@@ -405,7 +405,7 @@ class ObjectSet(models.Model):
         self.save()
         return loaded
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def add(self, obj, added=False):
         "Adds `obj` to the set."
         self._check_pk()
@@ -416,7 +416,7 @@ class ObjectSet(models.Model):
             self.save()
         return added
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def remove(self, obj, delete=False):
         "Removes `obj` from the set."
         self._check_pk()
@@ -438,7 +438,7 @@ class ObjectSet(models.Model):
         self.save()
         return True
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def update(self, objs, added=True):
         "Update the current set with the objects not already in the set."
         self._check_pk()
@@ -450,7 +450,7 @@ class ObjectSet(models.Model):
         self.save()
         return added
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def clear(self, delete=False):
         "Remove all objects from the set."
         self._check_pk()
@@ -464,7 +464,7 @@ class ObjectSet(models.Model):
         self.save()
         return removed
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def replace(self, objs, delete=False, added=True):
         "Replace the current set with the new objects."
         self._check_pk()
